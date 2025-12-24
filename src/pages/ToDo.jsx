@@ -1,11 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 
 const ToDo = () => {
-  const [todo, setTodo] = useState([]);
-  const [completed, setCompleted] = useState([]);
+  const [todo, setTodo] = useState(() => {
+    const savedTodo = Cookies.get("todo");
+    return savedTodo ? JSON.parse(savedTodo) : [];
+  });
+  const [completed, setCompleted] = useState(() => {
+    const savedCompleted = Cookies.get("completed");
+    return savedCompleted ? JSON.parse(savedCompleted) : [];
+  });
   const [curr, setCurr] = useState("");
 
   const onSubmit = () => {
+    if(!curr) return;
     setTodo(prev => [...prev, curr]);
     setCurr("");
   }
@@ -16,12 +24,26 @@ const ToDo = () => {
 
   const markComplete = (item) => {
     setCompleted(prev => [...prev, item]);
+    removeFromToDo(item);
   }
 
 
   const removeFromCompleted = (item) => {
     setCompleted(prev => prev.filter((i) => i != item))
   }
+
+  // Use to save array in cookies whenever list values are changed
+  // For todo
+  useEffect(() => {
+    Cookies.set("todo", JSON.stringify(todo), {expires: 36500});
+    console.log("Set todo");
+  },[todo]);
+
+  // For completed
+  useEffect(() => {
+    Cookies.set("completed", JSON.stringify(completed), {expires: 36500});
+    console.log("Set completed");
+  },[completed]);
 
   return (
     <div className="h-[100vh] text-white w-[100vw] bg-gray-700 gap-6 flex flex-col items-center pt-12">
@@ -39,7 +61,7 @@ const ToDo = () => {
       
       <div className="flex flex-col gap-2 w-[90%] md:w-[50%] lg:w-[30%]">
         {
-          todo.map((item) => (<span onClick={(e) => markComplete(item)} className="flex cursor-pointer justify-between px-6 py-3 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-md"><p>📥&nbsp;&nbsp;{item}</p><button onClick={(e) => {e.stopPropagation();removeFromToDo(item)}}>❌</button></span>))
+          todo.map((item) => (<span key={item} onClick={(e) => markComplete(item)} className="flex cursor-pointer justify-between px-6 py-3 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-md"><p>📥&nbsp;&nbsp;{item}</p><button onClick={(e) => {e.stopPropagation();removeFromToDo(item)}}>❌</button></span>))
         }
       </div>
 
@@ -49,7 +71,7 @@ const ToDo = () => {
       }
       <div className="flex flex-col gap-2 w-[90%] md:w-[50%] lg:w-[30%]">
         { completed.length != 0 &&
-          completed.map((item) => (<span className="flex justify-between px-6 py-3 bg-green-500/20 hover:bg-green-500/30 rounded-md"><p>✅&nbsp;&nbsp;{item}</p><button onClick={() => removeFromCompleted(item)}>❌</button></span>))
+          completed.map((item) => (<span key={item} className="flex justify-between px-6 py-3 bg-green-500/20 hover:bg-green-500/30 rounded-md"><p>✅&nbsp;&nbsp;{item}</p><button onClick={() => removeFromCompleted(item)}>❌</button></span>))
         }
       </div>
     </div>
