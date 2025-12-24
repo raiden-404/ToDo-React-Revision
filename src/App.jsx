@@ -1,13 +1,26 @@
 import { useState } from "react";
 
 const App = () => {
-  const [todo, setTodo] = useState([]);
+  const [todo, setTodo] = useState(["Yuvi", "riya"]);
   const [completed, setCompleted] = useState([]);
   const [curr, setCurr] = useState("");
 
   const onSubmit = () => {
     setTodo(prev => [...prev, curr]);
     setCurr("");
+  }
+
+  const removeFromToDo = (item) => {
+    setTodo(prev => prev.filter((i) => i != item));
+  }
+
+  const markComplete = (item) => {
+    setCompleted(prev => [...prev, item]);
+  }
+
+
+  const removeFromCompleted = (item) => {
+    setCompleted(prev => prev.filter((i) => i != item))
   }
 
   return (
@@ -22,10 +35,23 @@ const App = () => {
         <button onClick={() => onSubmit()}>➡️</button>
       </div>
       {/* To Do List */}
-      <p>{todo.length === 0 ? "No Task Defined" : "To-Do"}</p>
+      {todo.length != 0 && <p>To-Do</p>}
+      
+      <div className="flex flex-col gap-2 w-[90%] md:w-[50%] lg:w-[30%]">
+        {
+          todo.map((item) => (<span onClick={(e) => markComplete(item)} className="flex cursor-pointer justify-between px-6 py-3 bg-yellow-500/20 hover:bg-yellow-500/30 rounded-md"><p>📥&nbsp;&nbsp;{item}</p><button onClick={(e) => {e.stopPropagation();removeFromToDo(item)}}>❌</button></span>))
+        }
+      </div>
+
+      {/* Completed List */}
       {
-        todo.map((item) => <p>{item}</p>)
+        completed.length != 0 && <div>Completed Tasks</div>
       }
+      <div className="flex flex-col gap-2 w-[90%] md:w-[50%] lg:w-[30%]">
+        { completed.length != 0 &&
+          completed.map((item) => (<span className="flex justify-between px-6 py-3 bg-green-500/20 hover:bg-green-500/30 rounded-md"><p>✅&nbsp;&nbsp;{item}</p><button onClick={() => removeFromCompleted(item)}>❌</button></span>))
+        }
+      </div>
     </div>
   )
 }
